@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "cxando-mobile",
-    "slug": "cxando-mobile",
+    "name": "Whatsapp Saver",
+    "slug": "whatsapp-saver",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -19,7 +19,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.colthedeveloper.whatsappsaver"
     },
     "web": {
       "bundler": "metro",
@@ -31,6 +32,15 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "1f163c5f-b425-4e38-9c55-acbb8590470f"
+      }
+    },
+    "owner": "colthedeveloper"
   }
 }
