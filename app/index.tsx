@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Dimensions, Image, Platform, Pressable, RefreshControl, ScrollView, StyleSheet,  View } from "react-native";
+import { Dimensions, Image, PermissionsAndroid, Platform, Pressable, RefreshControl, ScrollView, StyleSheet,  View } from "react-native";
 import * as fileSystem from "expo-file-system";
 import { SafeAreaView } from "react-native-safe-area-context";
 // import * as VideoThumbnails from 'expo-video-thumbnails';
@@ -8,6 +8,8 @@ import Entypo from '@expo/vector-icons/Entypo';
 // import AntDesign from '@expo/vector-icons/AntDesign';
 import { PhotoModal } from "@/components/PhotoModal/PhotoModal";
 import { VideoModal } from "@/components/VideoModal/VideoModal";
+import * as IntentLauncher from 'expo-intent-launcher';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
 const itemWidth=Dimensions.get("screen").width / 3.5
@@ -19,9 +21,25 @@ export default function Index() {
   const [showImageModal,setShowImageModal]=useState(false)
   const [showVideoModal,setShowVideoModal]=useState(false)
   const [refreshing,setRefreshing]=useState(false)
+  const [hasPermission,setPermission]=useState<Promise<boolean> | boolean>((async()=>{
+    const data= await AsyncStorage.getItem("permission")
+    if(data==="true"){
+      return true
+    }
+    return false
+  }))
 
   const getFiles = async () => {
     try {
+      if(!hasPermission){
+        const permission= await fileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync(directoryUri)
+        console.log(permission)
+        setPermission(permission.granted)
+        if(permission.granted){
+          await AsyncStorage.setItem("permission","true")
+        }
+      }
+      
       if (Platform.OS === "android") {
         const statusFiles = await fileSystem.StorageAccessFramework.readDirectoryAsync(directoryUri);
         setFiles(statusFiles);

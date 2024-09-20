@@ -1,6 +1,8 @@
 import { Image, Modal, Pressable, StyleSheet, Text, View } from "react-native";
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as fileSystem from "expo-file-system"
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useState } from "react";
 
 type PhotoModalType={
     isVisible:boolean,
@@ -10,22 +12,41 @@ type PhotoModalType={
 
 export function PhotoModal({isVisible,data, close}:PhotoModalType){
 
+    const [saveDir,setSaveDir] = useState(async()=>{
+        const data= await AsyncStorage.getItem("saveDir")
+        return data
+    })
+    const [hasPermission,setHasPermission] = useState((async()=>{
+        const data= await AsyncStorage.getItem("savePermission")
+        
+        if(data=="true"){
+            return true
+        }
+        return false
+    }))
+
     const handleSave=async()=>{
-        const filename=`${new Date()}.jpg`
+        const filename=`${new Date().toISOString()}.jpg`
         const mimeType="image/jpg"
         try {
-            const permissions= await fileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync()
+            if(! await hasPermission){
+                const permissions= await fileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync()
+                console.log(permissions)
 
-            if(permissions.granted){
-                const base64= await fileSystem.readAsStringAsync(data,{encoding:fileSystem.EncodingType.Base64})
-                await fileSystem.StorageAccessFramework.createFileAsync(permissions.directoryUri,filename,mimeType)
-                .then(async(uri)=>{
-                    await fileSystem.writeAsStringAsync(uri,base64,{encoding:fileSystem.EncodingType.Base64})
-                })
-                .catch(e=>console.log(e))
-            }else{
+                await AsyncStorage.setItem("saveDir",permissions.directoryUri)
+                setSaveDir(permissions.directoryUri)
+                if(permissions.granted){
+                    await AsyncStorage.setItem("savePermission","true")
+                    setSaveDir(permissions.granted)
+                }
 
             }
+            // const permissions= await fileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync()
+            const base64= await fileSystem.readAsStringAsync(data,{encoding:fileSystem.EncodingType.Base64})
+            await fileSystem.StorageAccessFramework.createFileAsync(await saveDir,filename,mimeType)
+            .then(async(uri)=>{
+                await fileSystem.writeAsStringAsync(uri,base64,{encoding:fileSystem.EncodingType.Base64})
+            })
             close()
         } catch (error) {
             console.log(error)
