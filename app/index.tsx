@@ -31,7 +31,7 @@ export default function Index() {
 
   const getFiles = async () => {
     try {
-      if(!hasPermission){
+      if(! await hasPermission){
         const permission= await fileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync(directoryUri)
         console.log(permission)
         setPermission(permission.granted)

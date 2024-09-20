@@ -39,7 +39,7 @@ export function VideoModal({isVisible,data, close}:PhotoModalType){
                 setSaveDir(permissions.directoryUri)
                 if(permissions.granted){
                     await AsyncStorage.setItem("savePermission","true")
-                    setSaveDir(permissions.granted)
+                    setHasPermission(permissions.granted)
                 }
 
             }
