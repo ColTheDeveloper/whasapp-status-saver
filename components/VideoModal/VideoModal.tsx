@@ -4,6 +4,8 @@ import * as fileSystem from "expo-file-system"
 import { Video, ResizeMode } from 'expo-av';
 import { useRef, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useVideoPlayer, VideoView } from 'expo-video';
+import { useEvent } from "expo";
 
 type PhotoModalType={
     isVisible:boolean,
@@ -26,10 +28,18 @@ export function VideoModal({isVisible,data, close}:PhotoModalType){
         return false
     }))
 
+    const player = useVideoPlayer(data, player => {
+        player.loop=false;
+        player.play()
+
+    });
+
+    const { isPlaying } = useEvent(player, 'playingChange', { isPlaying: player.playing });
+
     const handleSave=async()=>{
         const filename=`${new Date().toISOString()}.mp4`
         const mimeType="video/mp4"
-        console.log(await hasPermission)
+        // console.log(await hasPermission)
         try {
             if(! await hasPermission){
                 const permissions= await fileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync()
@@ -49,11 +59,13 @@ export function VideoModal({isVisible,data, close}:PhotoModalType){
             .then(async(uri)=>{
                 await fileSystem.writeAsStringAsync(uri,base64,{encoding:fileSystem.EncodingType.Base64})
             })
+            player.pause()
             close()
         } catch (error) {
             console.log(error)
         }
     }
+
     return(
         <Modal 
             animationType="slide"
@@ -72,7 +84,7 @@ export function VideoModal({isVisible,data, close}:PhotoModalType){
                         }}
                     >
                         <Pressable
-                            onPress={() => close()}
+                            onPress={() =>{player.pause(); close()}}
                             style={{
                                 backgroundColor:"#ffffff14",
                                 borderRadius:50,
@@ -81,7 +93,7 @@ export function VideoModal({isVisible,data, close}:PhotoModalType){
                             <Ionicons name="close-sharp" size={40} color="red" />
                         </Pressable>
                     </View>
-                    <Video
+                    {/* <Video
                         ref={video}
                         style={{
                             width:"70%",
@@ -94,6 +106,16 @@ export function VideoModal({isVisible,data, close}:PhotoModalType){
                         onLoad={()=>video.current?.playAsync()}
                         isLooping
                         // onPlaybackStatusUpdate={status => setStatus(() => status)}
+                    /> */}
+                    <VideoView 
+                        player={player}  
+                        style={{
+                            width:"70%",
+                            height:"40%",
+                            marginHorizontal:"auto"
+                        }}
+                        allowsFullscreen 
+                        allowsPictureInPicture
                     />
                     <Pressable 
                         onPress={()=>handleSave()}

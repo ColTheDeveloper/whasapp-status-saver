@@ -31,7 +31,7 @@ export function PhotoModal({isVisible,data, close}:PhotoModalType){
         try {
             if(! await hasPermission){
                 const permissions= await fileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync()
-                console.log(permissions)
+                // console.log(permissions)
 
                 await AsyncStorage.setItem("saveDir",permissions.directoryUri)
                 setSaveDir(permissions.directoryUri)
