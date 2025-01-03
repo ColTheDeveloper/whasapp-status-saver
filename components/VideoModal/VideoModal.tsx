@@ -39,7 +39,7 @@ export function VideoModal({isVisible,data, close}:PhotoModalType){
     const handleSave=async()=>{
         const filename=`${new Date().toISOString()}.mp4`
         const mimeType="video/mp4"
-        // console.log(await hasPermission)
+        
         try {
             if(! await hasPermission){
                 const permissions= await fileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync()
